@@ -38,3 +38,9 @@ flavor, digest-pinned; README has the pin table) with a `mariadb` sidecar.
 - queue/cron behavior during the first-boot migration window (expected:
   brief crash-loop, then settle — same as upstream's own compose).
 - CardDAV/CalDAV at /dav with real clients.
+
+## Build gotchas (learned 2026-10-17)
+- Fresh clone needs `npm ci` BEFORE `make` — the Makefile includes s9pk.mk
+  from node_modules.
+- `start-sdk pack` list-ingredients requires an `assets/` dir to exist;
+  the repo commits `.gitkeep` for exactly that.
