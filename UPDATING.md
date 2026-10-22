@@ -2,14 +2,14 @@
 
 Upstream (`monicahq/monica`) releases as `vX.Y.Z` tags; runnable images land
 on Docker Hub as the **Docker Official Image** `monica`
-(hub.docker.com/_/monica), maintained by docker-library from
+(hub.docker.com/\_/monica), maintained by docker-library from
 `monicahq/docker`. Do **not** pin anything from the `monicahq/*` Hub org —
 those images are stale (2020). This package pins by **digest**.
 
 A bump is:
 
 1. Pick the upstream release (https://github.com/monicahq/monica/releases).
-   Skip beta lines (e.g. 5.0.0-beta.*) unless deliberately packaging one.
+   Skip beta lines (e.g. 5.0.0-beta.\*) unless deliberately packaging one.
 2. Resolve the digest:
    `docker buildx imagetools inspect monica:X.Y.Z-apache` — top-level
    `Digest:`, and confirm amd64+arm64 children are both present.
@@ -31,3 +31,20 @@ A bump is:
 7. Build + install on the test box. First boot after a real upgrade runs
    pending migrations via the app entrypoint — watch health before
    declaring done.
+
+## Digest-only re-pin (same upstream version)
+
+Base-image rebuilds — e.g. the PHP 8.2.35 security release on 2026-10-22 —
+ship under the _same_ monica tag, so the version string does not move. Re-pin
+anyway, on a `:N+1` rev, without waiting for an upstream Monica release:
+
+1. Resolve the tag's **index** digest from the Docker Hub API
+   (`tags/<tag>` → `.digest`), not a per-arch one — the manifest carries a
+   single multi-arch digest.
+2. Prove the rebuild actually fixes the thing: `docker run --entrypoint php
+<image> -v` on both `linux/amd64` and `linux/arm64`, and record the PHP
+   version before and after.
+3. Re-pin, bump `version` to `X.Y.Z:N+1`, write the advisory ids into the
+   release notes, build both arches.
+4. No `migrations.up` change: the data layout is untouched, so the update is
+   in place.

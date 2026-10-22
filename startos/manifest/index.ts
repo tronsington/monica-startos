@@ -17,13 +17,14 @@ export const manifest = setupManifest({
   images: {
     // Docker Official Image `monica` (built by docker-library from
     // monicahq/docker) — NOT the stale monicahq/* Hub org (last push 2020).
-    // v4.1.2-apache, pinned by index digest; verified amd64+arm64 on
-    // 2026-10-17: digest == `latest` == `4.1.2` tags, same-day rebuild, and
-    // the image's org.opencontainers.image.revision label == v4.1.2 commit.
+    // v4.1.2-apache, pinned by index digest. 2026-10-22 re-pin onto the
+    // PHP 8.2.35 security rebuild (GHSA-w8hw-w9fx-j79w, GHSA-6wmf-4rv5-p3rp);
+    // the previous 787c7e99… pin carried PHP 8.2.34. amd64+arm64 both
+    // verified to run 8.2.35 at the same upstream v4.1.2 revision.
     monica: {
       source: {
         dockerTag:
-          'monica:4.1.2-apache@sha256:787c7e9972cad3956f378afd93e0ac140863dba9199f81f6b368a65a96b32e54',
+          'monica:4.1.2-apache@sha256:16f20dcc0e8ed8d21fcd0f72358751c2603feea25ed1772aea9d5c9869b341e3',
       },
       arch: ['x86_64', 'aarch64'],
     },

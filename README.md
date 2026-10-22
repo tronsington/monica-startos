@@ -15,13 +15,13 @@ make arm        # monica_aarch64.s9pk (upstream publishes both)
 
 ## What this package is
 
-|              |                                                                                                     |
-| ------------ | --------------------------------------------------------------------------------------------------- |
-| Upstream pin | `monica:4.1.2-apache@sha256:787c7e99…` = **v4.1.2** (Docker Official Image, = `latest`, amd64+arm64) |
-| Sidecars     | `mariadb:11@sha256:f16d7a34…`                                                                        |
-| Interface    | one web UI + API + `/dav` (CardDAV/CalDAV) on port 80                                                |
-| Secrets      | `APP_KEY` / `HASH_SALT` / DB passwords — generated at install, never re-rolled                       |
-| Daemons      | mariadb + chown oneshot + app (apache; entrypoint auto-migrates) + queue worker + minute scheduler   |
+|              |                                                                                                                          |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------ |
+| Upstream pin | `monica:4.1.2-apache@sha256:16f20dcc…` = **v4.1.2**, PHP 8.2.35 rebuild (Docker Official Image, = `latest`, amd64+arm64) |
+| Sidecars     | `mariadb:11@sha256:f16d7a34…`                                                                                            |
+| Interface    | one web UI + API + `/dav` (CardDAV/CalDAV) on port 80                                                                    |
+| Secrets      | `APP_KEY` / `HASH_SALT` / DB passwords — generated at install, never re-rolled                                           |
+| Daemons      | mariadb + chown oneshot + app (apache; entrypoint auto-migrates) + queue worker + minute scheduler                       |
 
 Registrations ship **open** so you can create the first account; close them
 with the **Registration** action afterward (Monica is single-tenant by
