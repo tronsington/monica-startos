@@ -10,11 +10,25 @@ import {
   WWW_DATA_UID,
 } from './utils'
 
-// The app image's own long-running scripts (installed to /usr/local/bin by
-// monicahq/docker; verified at main + baked into the pinned image):
-const QUEUE_CMD = 'queue.sh' // php artisan queue:work --sleep=10 --timeout=0
-//                             --tries=3 --queue=default,migration
-const CRON_CMD = 'cron.sh' // busybox crond -f → every-minute `schedule:run`
+// 4.1.2:2 — do NOT use the image's queue.sh / cron.sh.
+//
+// The PHP 8.2.35 security rebuild of the monica image changed both scripts to
+// redirect their output to /proc/1/fd/{1,2}. StartOS runs these two daemons as
+// www-data (uid 33) so their storage writes match apache's, and the pipe behind
+// the container's PID 1 is root-owned and unreadable from that uid: the redirect
+// is refused ("cannot create /proc/1/fd/1: Permission denied"), the container
+// exits 2, and StartOS restarts the daemon — a ~5 s crash loop that leaves the
+// whole service failed. The command content is unchanged; only the redirect is
+// dropped, because stdout already lands in the package log.
+const QUEUE_CMD = [
+  'sh',
+  '-c',
+  'exec php /var/www/html/artisan queue:work --sleep=10 --timeout=0 --tries=3 --queue=default,migration',
+]
+// Same fix for crond: upstream's script passes `-L /proc/1/fd/1`. The crontab
+// it reads (/var/spool/cron/crontabs/www-data, baked into the image) is
+// untouched — this is only about where crond's own log lines go.
+const CRON_CMD = ['sh', '-c', 'exec busybox crond -f -l 0']
 
 export const main = sdk.setupMain(async ({ effects }) => {
   console.info(i18n('Starting Monica'))
@@ -251,7 +265,9 @@ export const main = sdk.setupMain(async ({ effects }) => {
       .addDaemon('queue', {
         subcontainer: queueSub,
         exec: {
-          command: sdk.useEntrypoint([QUEUE_CMD]),
+          // No image entrypoint: it is the script pair above that breaks
+          // under www-data, and the DB/app ordering is enforced by `requires`.
+          command: QUEUE_CMD,
           user: 'www-data',
           env: appEnv,
         },
@@ -275,7 +291,7 @@ export const main = sdk.setupMain(async ({ effects }) => {
       .addDaemon('cron', {
         subcontainer: cronSub,
         exec: {
-          command: sdk.useEntrypoint([CRON_CMD]),
+          command: CRON_CMD,
           user: 'www-data',
           env: appEnv,
         },
