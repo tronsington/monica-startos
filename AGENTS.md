@@ -44,3 +44,17 @@ flavor, digest-pinned; README has the pin table) with a `mariadb` sidecar.
   from node_modules.
 - `start-sdk pack` list-ingredients requires an `assets/` dir to exist;
   the repo commits `.gitkeep` for exactly that.
+
+## Daemons must not write to /proc/1/fd (learned 2026-11-06, released as 4.1.2:2)
+- The image's `/usr/local/bin/queue.sh` and `cron.sh` redirect output to `/proc/1/fd/{1,2}`.
+  StartOS runs those daemons as **www-data** while the pipe behind the container's PID 1 is
+  root-owned, so the redirect is refused (`cannot create /proc/1/fd/1: Permission denied`),
+  the container exits 2 and crash-loops every ~5 s. It ran like that from 2026-10-22 to
+  2026-11-06 — 416 exits — and the queue worker never processed a single job.
+- Fix shape: do not call the image's scripts. Run the same commands directly —
+  `sh -c 'exec php /var/www/html/artisan queue:work --sleep=10 --timeout=0 --tries=3
+  --queue=default,migration'` and `sh -c 'exec busybox crond -f -l 0'` (drop `-L /proc/1/fd/1`).
+- `exec.command` is typed `CommandType` = `[string, ...string[]]`; a `string[]` constant fails
+  `tsc` with "not assignable to CommandType".
+- Proof of a working fix, not a quiet log: job lines ending `DONE` in the package log,
+  `pgrep -f queue:work` inside `monica-queue`, and zero `exited with code 2` lines.
