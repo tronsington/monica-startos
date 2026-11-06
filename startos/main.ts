@@ -20,7 +20,7 @@ import {
 // exits 2, and StartOS restarts the daemon — a ~5 s crash loop that leaves the
 // whole service failed. The command content is unchanged; only the redirect is
 // dropped, because stdout already lands in the package log.
-const QUEUE_CMD = [
+const QUEUE_CMD: [string, ...string[]] = [
   'sh',
   '-c',
   'exec php /var/www/html/artisan queue:work --sleep=10 --timeout=0 --tries=3 --queue=default,migration',
@@ -28,7 +28,11 @@ const QUEUE_CMD = [
 // Same fix for crond: upstream's script passes `-L /proc/1/fd/1`. The crontab
 // it reads (/var/spool/cron/crontabs/www-data, baked into the image) is
 // untouched — this is only about where crond's own log lines go.
-const CRON_CMD = ['sh', '-c', 'exec busybox crond -f -l 0']
+const CRON_CMD: [string, ...string[]] = [
+  'sh',
+  '-c',
+  'exec busybox crond -f -l 0',
+]
 
 export const main = sdk.setupMain(async ({ effects }) => {
   console.info(i18n('Starting Monica'))

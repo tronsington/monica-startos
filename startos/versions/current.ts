@@ -4,7 +4,7 @@ export const current = VersionInfo.of({
   version: '4.1.2:2',
   releaseNotes: {
     en_US:
-      'Fixes the queue worker and scheduler crash loop that 4.1.2:1 hit on install: both now run without the image\'s log redirect, which is refused under the daemon user. Same Monica v4.1.2 and the same PHP 8.2.35 security rebuild as :1. No data change — installs in place over :1.',
+      "Fixes the queue worker and scheduler crash loop that 4.1.2:1 hit on install: both now run without the image's log redirect, which is refused under the daemon user. Same Monica v4.1.2 and the same PHP 8.2.35 security rebuild as :1. No data change — installs in place over :1.",
     es_ES:
       'Corrige el bucle de fallos del worker de cola y del planificador que aparecía al instalar 4.1.2:1: ambos se ejecutan ahora sin la redirección de registro de la imagen, que se rechaza con el usuario de los demonios. Mismo Monica v4.1.2 y misma recompilación de seguridad PHP 8.2.35 que :1. Sin cambios en los datos — se instala sobre :1.',
     de_DE:
